@@ -1,0 +1,4 @@
+echo "enter the username"
+read username
+echo "$username" | tr '[:lower]' '[:upper]'
+echo "$username" | tr '[:upper]' '[:lower]'
