@@ -1,0 +1,14 @@
+if [ -z "$1" ] ; then
+echo 'arugument was not passed'
+exit 1
+fi
+if [ -d "$1" ] ; then
+  echo "$l is a directory. DIsplaying content:"
+  ls "$1"
+elif [ -f "$1" ] ; then
+  echo "Sl is a file. Displaying contents:"
+  more "$1" 
+else
+  echo "Sl is neither a file nor a folder' 
+  exit 1
+fi
