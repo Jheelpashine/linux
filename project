@@ -1,0 +1,106 @@
+MSMTP FILE
+# Set default values for all accounts
+defaults
+auth           on
+tls            on
+tls_starttls   on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile        ~/.msmtp.log
+
+# Gmail account configuration
+account        gmail
+host           smtp.gmail.com
+port           587
+from           jheelpashine2006@gmail.com
+user           jheelpashine2006@gmail.com
+password       mebepyzjytaqiptx
+
+# Set gmail as the default account
+account default : gmail
+
+
+# Set default values for all accounts
+defaults
+auth           on
+tls            on
+tls_starttls   on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+logfile        ~/.msmtp.log
+
+# Gmail account configuration
+account        gmail
+host           smtp.gmail.com
+port           587
+from           jheelpashine2006@gmail.com
+user           jheelpashine2006@gmail.com
+password       mebepyzjytaqiptx
+
+# Set gmail as the default account
+account default : gmail
+
+CONVERT
+
+!/bin/bash
+
+# Check if the correct number of arguments provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <input_file.txt> <recipient_email>"
+    exit 1
+fi
+
+INPUT_FILE="$1"
+RECIPIENT="$2"
+
+# Check if input file exists
+if [ ! -f "$INPUT_FILE" ]; then
+    echo "Error: File '$INPUT_FILE' not found!"
+    exit 1
+fi
+
+# Generate filenames
+BASENAME=$(basename "$INPUT_FILE" .txt)
+PS_FILE="${BASENAME}.ps"
+PDF_FILE="${BASENAME}.pdf"
+PDF_FILE="${BASENAME}.pdf"
+
+# Convert txt to PostScript and then to PDF
+enscript "$INPUT_FILE" -o "$PS_FILE"
+ps2pdf "$PS_FILE" "$PDF_FILE"
+rm -f "$PS_FILE"  # Clean up intermediate file
+
+# Email details
+SUBJECT="SEC project"
+BODY="This is SEC project of Jheel Pashine,Roll no.23[CSE]"
+
+# Create a temporary file for the email content with attachment (MIME format)
+TMPMAIL=$(mktemp /tmp/msmtp_mail.XXXXXX)
+# Build MIME email with attachment
+{
+  echo "From: $(grep ^from ~/.msmtprc | head -n1 | awk '{print $2}')"
+  echo "To: $RECIPIENT"
+  echo "Subject: $SUBJECT"
+  echo "MIME-Version: 1.0"
+  echo "Content-Type: multipart/mixed; boundary=\"BOUNDARY\""
+  echo
+  echo "--BOUNDARY"
+  echo "Content-Type: text/plain; charset=\"UTF-8\""
+  echo "Content-Transfer-Encoding: 7bit"
+  echo
+  echo "$BODY"
+  echo
+  echo "--BOUNDARY"
+  echo "Content-Type: application/pdf; name=\"$PDF_FILE\""
+  echo "Content-Transfer-Encoding: base64"
+  echo "Content-Disposition: attachment; filename=\"$PDF_FILE\""
+  echo
+  base64 "$PDF_FILE"
+echo "--BOUNDARY--"
+} > "$TMPMAIL"
+
+# Send the email using msmtp
+msmtp --debug --from=default -t < "$TMPMAIL"
+
+# Clean up
+rm -f "$TMPMAIL" "$PDF_FILE"
+
+echo "✅ PDF created and emailed to $RECIPIENT"
