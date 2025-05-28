@@ -1,0 +1,21 @@
+if [ -z "$1" ]; then
+        echo "usage= $0 no UID was passed"
+        exit 1
+fi
+
+Uid=$1
+entry=$(getent passwd "$Uid")
+if [ -z "entry" ]; then
+        echo "no user found with UID $Uid"
+        exit 1
+fi
+username=$(echo "$entry" | cut -d: -f1)
+homedir=$(echo "$entry" | cut -d: -f6)
+shell=$(echo "$entry" | cut -d: -f7)
+allGroups=$(id -nG "$username")
+
+echo " UID            : $Uid"
+echo " username       : $username"
+echo " home directory : $homedir"
+echo " shell          : $shell"
+echo " all groups     : $allGroups"
