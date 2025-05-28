@@ -1,0 +1,8 @@
+user=$(whoami)
+login=$(last "user" | grep -v 'wtmp begins' | wc -l)
+total=$(last | awk '{print $1}' | grep -v 'wtmp' | sort | uniq | wc -l)
+echo "user $user has logged in $login times"
+echo "total number of user logged in:$total"
+echo "the list of users are:"
+who
+
